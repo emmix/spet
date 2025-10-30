@@ -10,4 +10,3 @@ export const bootstrapPeers = [
 
 export const PUBSUB_PEER_DISCOVERY = 'spet-peer-discovery';
 
-export const Topics = ['story', 'estimation', 'result'];

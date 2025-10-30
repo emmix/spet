@@ -19,7 +19,7 @@ import { kadDHT, removePublicAddressesMapper, removePrivateAddressesMapper } fro
 //import { ping } from '@libp2p/ping';
 import { peerIdFromString } from '@libp2p/peer-id';
 import { getPeerTypes, getAddresses, getPeerDetails } from './utils.js';
-import { PUBSUB_PEER_DISCOVERY, Topics } from './constants.js';
+import { PUBSUB_PEER_DISCOVERY } from './constants.js';
 //import { bootstrappers } from './bootstrappers.js';
 
 export async function createNode(log, bootstrapAddr) {
@@ -61,10 +61,7 @@ export async function createNode(log, bootstrapAddr) {
     services: {
       pubsub: gossipsub({
         allowPublishToZeroTopicPeers: true,
-        //enabled: true,
-        //emitSelf: true,
-        //floodPublish: true,
-        //doPx: true
+        emitSelf: true,
       }),
       identify: identify(),
     }
@@ -95,12 +92,7 @@ export async function createNode(log, bootstrapAddr) {
     const connectedPeers = node.getPeers();
     log.debug(`connection count: ${connectedPeers.length} peers.`);
   });
-  node.addEventListener('peer:disconnect', async (evt) => {
-    const remotePeer = evt.detail;
-    log.debug('peer:disconnect: ', remotePeer.toString());
-    const connectedPeers = node.getPeers();
-    log.debug(`connection count: ${connectedPeers.length} peers.`);
-  });
+ 
 
   return node;
 }
