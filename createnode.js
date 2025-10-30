@@ -60,8 +60,7 @@ export async function createNode(log, bootstrapAddr) {
     ],
     services: {
       pubsub: gossipsub({
-        //allowPublishToZeroPeers: true,
-        //allowPublishToZeroTopicPeers: true,
+        allowPublishToZeroTopicPeers: true,
         //enabled: true,
         //emitSelf: true,
         //floodPublish: true,
