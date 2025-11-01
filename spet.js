@@ -80,6 +80,7 @@ rl.on('line', (line) => {
       break;
     }
     case 'result': {
+      handleResult();
       break;
     }
     case 'stats': {
@@ -87,7 +88,7 @@ rl.on('line', (line) => {
       break;
     }
     case 'users': {
-      console.log(users);
+      handleUsers();
       break;
     }
     case 'quit' || 'q' : {
@@ -123,7 +124,7 @@ function handleStory(arg) {
     .catch((err) => {
       log.error(err);
     });
-  
+ points.clear(); 
 }
 
 function handleStats(node) {
@@ -139,24 +140,36 @@ function handleStats(node) {
   console.log('\n');
 
 }
-const uint8ArrayFromJson = (json) => {
-  const jsonString = JSON.stringify(json); // Convert JSON object to string
-  return uint8ArrayFromString(jsonString); // Convert string to Uint8Array
-};
+function handleUsers() {
+  console.log(users);
+}
+
+function handleResult() {
+  var res = {};
+  res.min = 1;
+  res.max = 5;
+  res.avg = 2;
+
+  node.services.pubsub.publish(topics.get('result'), uint8ArrayFromJson(res)).catch((_err) => {
+    console.error(_err)
+  });
+}
+
+
 
 node.services.pubsub.addEventListener('message', (evt) => {
   log.debug(`message: ${evt.detail.topic}`);
   if (evt.detail.topic == topics.get('story')) {
     onStory(evt.detail.data);
   } else if (evt.detail.topic == topics.get('result')) {
-    //onResult(evt.detail.data);
+    onResult(evt);
   } else if (evt.detail.topic == topics.get('estimation')) {
     onEstimation(evt);
   } else if (evt.detail.topic == topics.get('user')) {
     users.set(evt.detail.from.toString(), uint8ArrayToString(evt.detail.data));
   }
 
-  rl.prompt(true);
+  //rl.prompt(true);
 })
 
 function onStory(arg) {
@@ -179,15 +192,12 @@ function onEstimation(evt) {
   log.info('current points: ', points);
 }
 
-function onResult() {
-  var res = {};
-  res.min = 1;
-  res.max = 5;
-  res.avg = 2;
-
-  node.services.pubsub.publish(topics.get('result'), uint8ArrayFromJson(res)).catch((_err) => {
-    //console.error(_err)
-  });
+function onResult(evt) {
+  const result = uint8ArrayToString(evt.detail.data);
+  console.log('result: ', result);
 }
 
-
+const uint8ArrayFromJson = (json) => {
+  const jsonString = JSON.stringify(json); // Convert JSON object to string
+  return uint8ArrayFromString(jsonString); // Convert string to Uint8Array
+}

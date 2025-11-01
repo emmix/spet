@@ -8,7 +8,7 @@ import { floodsub } from '@libp2p/floodsub';
 import { webSockets } from '@libp2p/websockets';
 import { tcp } from '@libp2p/tcp';
 import { circuitRelayServer } from '@libp2p/circuit-relay-v2';
-import { PUBSUB_PEER_DISCOVERY, Topics } from './constants.js';
+import { PUBSUB_PEER_DISCOVERY } from './constants.js';
 import { generateKeyPair, generateKeyPairFromSeed } from '@libp2p/crypto/keys';
 import { kadDHT, removePublicAddressesMapper, removePrivateAddressesMapper } from '@libp2p/kad-dht';
 import { ping } from '@libp2p/ping';
