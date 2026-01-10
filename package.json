@@ -8,8 +8,12 @@
   "scripts": {
     "relay": "node ./relay.js",
     "spet": "node ./spet.js",
+    "clean": "rm -rf dist",
     "format": "prettier --write .",
-    "format-check": "prettier --check ."
+    "format-check": "prettier --check .",
+    "build:bundle": "node build-bundle.js",
+    "build:sea": "node build-sea.js",
+    "build:all": "npm run clean && npm run build:js && npm run build:bundle && npm run build:sea"
   },
   "dependencies": {
     "@chainsafe/libp2p-gossipsub": "^14.1.1",
@@ -44,6 +48,8 @@
     "vite": "^6.0.3"
   },
   "devDependencies": {
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "commander": "^13.1.0",
+    "esbuild": "^0.19.12"
   }
 }
