@@ -14,29 +14,12 @@ import { kadDHT, removePublicAddressesMapper, removePrivateAddressesMapper } fro
 import { ping } from '@libp2p/ping';
 //import { peerIdFromString } from '@libp2p/peer-id';
 //import bootstrappers from './bootstrappers.js';
-import log from 'loglevel';
-import { program, Option } from 'commander'
 
-program.version('0.0.1');
-program
-  .option('-d, --debug', 'enable debug logging', false)
-  .option('-a, --announce <ip>', 'announce public ip addresse',
-    '106.15.108.69')
-program.parse(process.argv);
-
-const opts = program.opts();
-if (opts.debug) log.setLevel('debug');
-else log.setLevel('info');
-
-log.debug('Options:');
-log.debug(opts);
-
-const seed = new Uint8Array([
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
-  17, 18, 19, 20, 21, 22, 23, 24, 24, 26, 27, 28, 29, 30, 31,
-]);
-
-async function main() {
+export async function relay(announceIp, log) {
+  const seed = new Uint8Array([
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+    17, 18, 19, 20, 21, 22, 23, 24, 24, 26, 27, 28, 29, 30, 31,
+  ]);
   var keypair = await generateKeyPairFromSeed('Ed25519', seed);
   const node = await createLibp2p({
     privateKey: keypair,
@@ -46,8 +29,8 @@ async function main() {
         '/ip4/0.0.0.0/tcp/9002',
       ],
       appendAnnounce: [
-        `/ip4/${opts.announce}/tcp/9001/ws`,
-        `/ip4/${opts.announce}/tcp/9002`
+        `/ip4/${announceIp}/tcp/9001/ws`,
+        `/ip4/${announceIp}/tcp/9002`
       ],
     },
     transports: [webSockets(), tcp()],
@@ -111,5 +94,3 @@ async function main() {
 
   await node.services.pubsub.subscribe(PUBSUB_PEER_DISCOVERY);
 }
-
-main();
