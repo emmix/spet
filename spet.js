@@ -138,7 +138,7 @@ async function spet() {
  help    show this help \n\
  stats   show stats \n\
  users   list connected users \n\
- files   list file names in current directory \n\
+ files   list file names and count in current directory \n\
  quit    quit the app \n',
     );
   }
@@ -175,7 +175,7 @@ async function spet() {
       const fullPath = path.join(cwd, name);
       return fs.statSync(fullPath).isFile();
     });
-    console.log(`Files in ${cwd}:`);
+    console.log(`Files in ${cwd} (${files.length}):`);
     files.forEach((f) => console.log(`  ${f}`));
   }
 
