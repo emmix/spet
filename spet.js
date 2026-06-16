@@ -1,4 +1,4 @@
-import { program, Option } from 'commander'
+import { program, Option } from 'commander';
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string';
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string';
 import log from 'loglevel';
@@ -16,33 +16,42 @@ import path from 'node:path';
 let users = new Map();
 let points = new Map();
 let topics = new Map([
-  ['story', "story"],
-  ['estimation', "estimation"],
-  ['result', "result"],
-  ['user', "user"]
-
+  ['story', 'story'],
+  ['estimation', 'estimation'],
+  ['result', 'result'],
+  ['user', 'user'],
 ]);
 
 program.version('0.0.1');
 program
   .description('story point estimation tool')
   .option('-i, --room <id>', 'room identifier', 'spetroom')
-  .option('-a, --addr <multiaddr>', 'relay address',
-    '/ip4/106.15.108.69/tcp/9001/ws/p2p/12D3KooWPYze48sqQ2wUbkS9RHpuJ2CRNCrTZG3Bj6KvXTygHsHr')
-  .addOption(new Option('-m, --method <name>', 'estimation method')
-    .choices(['free-number', 't-thirt', 'fibonacci', 'modified-fibonacci', 'powers-of-two'])
-    .default('free-number'))
+  .option(
+    '-a, --addr <multiaddr>',
+    'relay address',
+    '/ip4/106.15.108.69/tcp/9001/ws/p2p/12D3KooWPYze48sqQ2wUbkS9RHpuJ2CRNCrTZG3Bj6KvXTygHsHr',
+  )
+  .addOption(
+    new Option('-m, --method <name>', 'estimation method')
+      .choices([
+        'free-number',
+        't-thirt',
+        'fibonacci',
+        'modified-fibonacci',
+        'powers-of-two',
+      ])
+      .default('free-number'),
+  )
   .option('-H, --hide', 'hide the estimation results until the end')
   .option('-n, --name <name>', 'your name', 'undefined')
   .option('-d, --debug', 'enable debug logging', false)
-  .option('--announce <ip>', 'announce public ip addresse',
-    '106.15.108.69')
+  .option('--announce <ip>', 'announce public ip addresse', '106.15.108.69')
   .option('--relay', 'run as relay node', false);
 
 program.parse(process.argv);
 const opts = program.opts();
 
-if (opts.debug) log.setLevel('debug')
+if (opts.debug) log.setLevel('debug');
 else log.setLevel('info');
 
 log.debug('Options:');
@@ -54,17 +63,19 @@ async function spet() {
   log.debug('Multiaddrs: ', node.getMultiaddrs());
 
   for (let [key, value] of topics) {
-    topics.set(key, value + "_" + opts.room);
+    topics.set(key, value + '_' + opts.room);
     await node.services.pubsub.subscribe(topics.get(key));
   }
-  setInterval(
-    async () => {
-      try {
-        await node.services.pubsub.publish(topics.get('user'), uint8ArrayFromString(opts.name ?? ''))
-      } catch (err) {
-        log.error('Failed to publish user info:', err);
-      }
-    }, 5000);
+  setInterval(async () => {
+    try {
+      await node.services.pubsub.publish(
+        topics.get('user'),
+        uint8ArrayFromString(opts.name ?? ''),
+      );
+    } catch (err) {
+      log.error('Failed to publish user info:', err);
+    }
+  }, 5000);
   node.addEventListener('peer:disconnect', async (evt) => {
     const remotePeer = evt.detail;
     log.debug('peer:disconnect: ', remotePeer.toString());
@@ -103,7 +114,8 @@ async function spet() {
         handleFiles();
         break;
       }
-      case 'quit' || 'q': {
+      case 'q':
+      case 'quit': {
         console.log('Bye!');
         process.exit(0);
       }
@@ -151,7 +163,6 @@ async function spet() {
     console.log('Peer Details:');
     console.log(getPeerDetails(node));
     console.log('\n');
-
   }
   function handleUsers() {
     console.log(users);
@@ -160,12 +171,12 @@ async function spet() {
   function handleFiles() {
     const cwd = process.cwd();
     const entries = fs.readdirSync(cwd);
-    const files = entries.filter(name => {
+    const files = entries.filter((name) => {
       const fullPath = path.join(cwd, name);
       return fs.statSync(fullPath).isFile();
     });
     console.log(`Files in ${cwd}:`);
-    files.forEach(f => console.log(`  ${f}`));
+    files.forEach((f) => console.log(`  ${f}`));
   }
 
   function handleResult() {
@@ -174,12 +185,12 @@ async function spet() {
     res.max = 5;
     res.avg = 2;
 
-    node.services.pubsub.publish(topics.get('result'), uint8ArrayFromJson(res)).catch((_err) => {
-      console.error(_err)
-    });
+    node.services.pubsub
+      .publish(topics.get('result'), uint8ArrayFromJson(res))
+      .catch((_err) => {
+        console.error(_err);
+      });
   }
-
-
 
   node.services.pubsub.addEventListener('message', (evt) => {
     log.debug(`message: ${evt.detail.topic}`);
@@ -190,18 +201,24 @@ async function spet() {
     } else if (evt.detail.topic == topics.get('estimation')) {
       onEstimation(evt);
     } else if (evt.detail.topic == topics.get('user')) {
-      users.set(evt.detail.from.toString(), uint8ArrayToString(evt.detail.data));
+      users.set(
+        evt.detail.from.toString(),
+        uint8ArrayToString(evt.detail.data),
+      );
     }
 
     //rl.prompt(true);
-  })
+  });
 
   function onStory(arg) {
     const storyDesc = uint8ArrayToString(arg);
     console.log('story: ', storyDesc);
     rl.question('input story point: ', (input) => {
       try {
-        node.services.pubsub.publish(topics.get('estimation'), uint8ArrayFromString(input ?? ''))
+        node.services.pubsub.publish(
+          topics.get('estimation'),
+          uint8ArrayFromString(input ?? ''),
+        );
       } catch (err) {
         log.error('Failed to publish result info:', err);
       }
@@ -224,7 +241,7 @@ async function spet() {
   const uint8ArrayFromJson = (json) => {
     const jsonString = JSON.stringify(json); // Convert JSON object to string
     return uint8ArrayFromString(jsonString); // Convert string to Uint8Array
-  }
+  };
 }
 
 async function main() {
