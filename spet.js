@@ -10,6 +10,8 @@ import { createNode } from './createnode.js';
 import { getAddresses, getPeerDetails, getPeerTypes } from './utils.js';
 import { tr } from 'date-fns/locale';
 import { relay } from './relay.js';
+import fs from 'node:fs';
+import path from 'node:path';
 
 let users = new Map();
 let points = new Map();
@@ -97,6 +99,10 @@ async function spet() {
         handleUsers();
         break;
       }
+      case 'files': {
+        handleFiles();
+        break;
+      }
       case 'quit' || 'q': {
         console.log('Bye!');
         process.exit(0);
@@ -120,6 +126,7 @@ async function spet() {
  help    show this help \n\
  stats   show stats \n\
  users   list connected users \n\
+ files   list file names in current directory \n\
  quit    quit the app \n',
     );
   }
@@ -148,6 +155,17 @@ async function spet() {
   }
   function handleUsers() {
     console.log(users);
+  }
+
+  function handleFiles() {
+    const cwd = process.cwd();
+    const entries = fs.readdirSync(cwd);
+    const files = entries.filter(name => {
+      const fullPath = path.join(cwd, name);
+      return fs.statSync(fullPath).isFile();
+    });
+    console.log(`Files in ${cwd}:`);
+    files.forEach(f => console.log(`  ${f}`));
   }
 
   function handleResult() {
